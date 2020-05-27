@@ -20,9 +20,11 @@ $ apt-get install libelf-dev
 1. Write an OpenSGX program in the `opensgx/user/test` directory (instructions on writing OpenSGX programs can be found [here](https://github.com/sslab-gatech/opensgx)). In this example, we will compile and run the `aes.c` program in the provided directory `opensgx/user/test/openssl/`
 2. `cd` back to the main directory `opensgx/`, then compile the program by running `make -C user`
 
-### Generate Trace
-1. After compiling the program, change into the correct directory by running `cd opensgx/user`
-2. Run the trace generator by running `./test.sh test/your-program`, where `your-program` is the OpenSGX program that was written in Step 1. A trace file will be generated in the `opensgx/user/test/` directory as `your-program.out`. For example, to run the `aes` program, run `./test.sh test/openssl/aes`. The message `Writing to file test/openssl/aes.out` will be printed to the console. This will generate the trace file `test/openssl/aes.out`, which takes approximately 3 minutes.
+### Generate the Program Trace
+1. After compiling the program, change into the `user/` directory by running `cd opensgx/user`
+2. Run the trace generator by running `./test.sh test/your-program`, where `your-program` is the OpenSGX program that was written in Step 1. A trace file will be generated in the `opensgx/user/test/` directory as `your-program.out`.
+
+For example, to run the `aes` program, run `./test.sh test/openssl/aes`. The message `Writing to file test/openssl/aes.out` will be printed to the console. This will generate the trace file `test/openssl/aes.out`. Generating the `aes.out` trace takes approximately 3 minutes.
 
 Running the command `head test/openssl/aes.out` will display the first few lines of the generated `aes.out` trace:
 ```
@@ -33,7 +35,7 @@ Running the command `head test/openssl/aes.out` will display the first few lines
 0.001000 0 0x4000a3fea4 2
 0.001000 0 0x4000a3fea6 2
 ```
-Each line has the format `<timestamp> <enclave mode> <memory address> <type>`, where `<type>` indicates whether the memory reference was an instruction fetch, load, or store.
+Each line has the format `<timestamp> <enclave mode> <memory address> <type>`, where `<type>` indicates whether the memory reference was an instruction fetch (`2`), load (`0`), or store (`1`).
 
 ## Modified Files from the Original OpenSGX
 * Files in `/opensgx/qemu/target-i386`
