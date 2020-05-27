@@ -185,3 +185,5 @@ libsgx/musl-libc/tools/ld.musl-clang
 libsgx/musl-libc/lib/musl-gcc.specs
 libsgx/musl-libc/src/internal/version.h
 
+# SGX-Cache simulator traces
+user/test/openssl/*.out

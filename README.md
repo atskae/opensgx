@@ -4,7 +4,7 @@ This is a memory trace generator for the [SGX-Cache simulator](https://github.co
 This trace generator was tested on Ubuntu 18.04.4 LTS (from `lsb_release -a` command).
 
 ## Building the Trace Generator
-Original build instructions from [here](https://github.com/sslab-gatech/opensgx) reproduced below:
+The original build instructions (for Ubuntu only) from [here](https://github.com/sslab-gatech/opensgx) are reworded below:
 1. Install the following on Ubuntu:
 ```
 $ apt-get build-dep qemu
@@ -16,10 +16,24 @@ $ apt-get install libelf-dev
 5. Compile the user-level code by running `make -C user`
 
 ## Generating Traces
-1. Write an OpenSGX program in the `opensgx-cache/user/test` directory (instructions on writing OpenSGX programs can be found [here](https://github.com/sslab-gatech/opensgx))
-2. Compile the program by running `make -C user`
-3. Change into the correct directory by running `cd opensgx-cache/user`
-4. Run the trace generator by running `./test.sh test/your-program`, where `your-program` is the OpenSGX program that was compiled in Step 1. A trace file will be generated in the `opensgx-cache/user/test/` directory as `your-program.out`
+### Compile an OpenSGX Program
+1. Write an OpenSGX program in the `opensgx/user/test` directory (instructions on writing OpenSGX programs can be found [here](https://github.com/sslab-gatech/opensgx)). In this example, we will compile and run the `aes.c` program in the provided directory `opensgx/user/test/openssl/`
+2. `cd` back to the main directory `opensgx/`, then compile the program by running `make -C user`
+
+### Generate Trace
+1. After compiling the program, change into the correct directory by running `cd opensgx/user`
+2. Run the trace generator by running `./test.sh test/your-program`, where `your-program` is the OpenSGX program that was written in Step 1. A trace file will be generated in the `opensgx/user/test/` directory as `your-program.out`. For example, to run the `aes` program, run `./test.sh test/openssl/aes`. The message `Writing to file test/openssl/aes.out` will be printed to the console. This will generate the trace file `test/openssl/aes.out`, which takes approximately 3 minutes.
+
+Running the command `head test/openssl/aes.out` will display the first few lines of the generated `aes.out` trace:
+```
+60.521000 0 0x4000a3f090 2
+0.014000 0 0x4000a3f093 2
+0.125000 0 0x4000a3fea0 2
+0.002000 0 0x4000a3fea1 2
+0.001000 0 0x4000a3fea4 2
+0.001000 0 0x4000a3fea6 2
+```
+Each line has the format `<timestamp> <enclave mode> <memory address> <type>`, where `<type>` indicates whether the memory reference was an instruction fetch, load, or store.
 
 ## Modified Files from the Original OpenSGX
 * Files in `/opensgx/qemu/target-i386`
@@ -38,6 +52,8 @@ $ apt-get install libelf-dev
 * `opensgx/qemu/tcg/tcg-plugin.c`
     * Modifed `tcg_plugin_after_gen_tb()` to save the trace file name
     * Modified `cpus_stopped()` to close the trace file.
+* `.gitignore`
+    * Added `user/test/openssl/*.out` to ignore the generated traces files when commiting to the repository
 
 ### Other Modified Files
 These files were modified due to build errors from the original OpenSGX
@@ -48,3 +64,6 @@ These files were modified due to build errors from the original OpenSGX
     * Replaced all instances of `struct ucontext *uc = puc` with `ucontext_t *uc = puc`
     * Error found in `/opensgx/qemu/user-exec.c`
     * [Solution source](https://lore.kernel.org/patchwork/patch/851352/)
+
+## Added Files
+Provided are sample OpenSGX programs of different crypto algorithms. These programs were added in the `opensgx/user/test/openssl` directory.
