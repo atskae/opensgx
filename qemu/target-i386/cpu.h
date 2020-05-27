@@ -1009,6 +1009,12 @@ typedef struct CPUX86State {
     uint64_t xcr0;
 
     TPRAccess tpr_access_type;
+
+	// sgxc
+	FILE* trace;
+	clock_t previous_timestamp; // used to calculate intervals between memory traces
+	clock_t start;
+
 } CPUX86State;
 
 #include "cpu-qom.h"

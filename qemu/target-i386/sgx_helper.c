@@ -1106,6 +1106,20 @@ void helper_mem_execute(CPUX86State *env, target_ulong a0)
     }
 }
 
+// sgxc
+void write_to_trace(CPUX86State* env, uint64_t mem_addr, int operation) {	
+	// calculate interval between previous timestamp
+	clock_t now = clock();
+	fprintf(env->trace, "%f %i %p %i\n", ( (double)(now - env->previous_timestamp) / CLOCKS_PER_SEC ) * 1000, env->cregs.CR_ENCLAVE_MODE, mem_addr, operation);	// interval in miliseconds
+	env->previous_timestamp = now;
+}
+
+// sgxc
+void helper_access_icache(CPUX86State* env, int in_enclave_mode, target_ulong pc) {
+	uint64_t mem_addr = (uint64_t) pc;
+	write_to_trace(env, pc, 2);
+}
+
 // helper test
 void helper_mem_access(CPUX86State *env, target_ulong a0, int operation)
 {
@@ -1168,6 +1182,9 @@ void helper_mem_access(CPUX86State *env, target_ulong a0, int operation)
             //raise_exception(env, EXCP0D_GPF);
         }
     }
+
+    // sgxc
+	write_to_trace(env, a0, operation);
 }
 
 // Get SECS of enclave based on epcm of EPC page

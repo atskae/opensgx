@@ -37,6 +37,9 @@ static TCGArg *tb_data2;
 
 static int init=0;
 
+// sgxc
+FILE* cache_trace = NULL;
+
 /* Wrapper to ensure only non-generic plugins can access non-generic data.  */
 #define TPI_CALLBACK_NOT_GENERIC(callback, ...) \
     do {                                        \
@@ -52,6 +55,9 @@ static int init=0;
 
 static void cpus_stopped(const TCGPluginInterface *tpi)
 {
+    // sgxc
+	fclose(cache_trace); // close here so we do not have to write with fflush() 
+
     unsigned int i;
     for (i = 0; i < tpi->nb_cpus; i++) {
         printf("number of executed instructions on CPU #%d = %" PRIu64 "\n",
@@ -173,6 +179,12 @@ void tcg_plugin_after_gen_tb(CPUState *env, TranslationBlock *tb)
         TPI_CALLBACK_NOT_GENERIC(after_gen_tb);
     }
     in_gen_tpi_helper = false;
+
+    // sgxc
+	if(!cache_trace) {	
+		CPUX86State* c = (CPUX86State*) env->env_ptr; 
+		cache_trace = c->trace; // record trace file name
+	}
 }
 
 /* Hook called each time a TCG opcode is generated.  */

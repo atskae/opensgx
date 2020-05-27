@@ -4426,6 +4426,16 @@ static void gen_sse(CPUX86State *env, DisasContext *s, int b,
     }
 }
 
+// sgxc
+// from this paper: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6945730&tag=1
+void wrapper_access_icache(int in_enclave_mode, target_ulong pc) {
+    // move value to a TCGv variable (a container so that qemu can insert them into the insn stream)
+    TCGv tcgv_pc = tcg_temp_new_i64();
+    tcg_gen_movi_tl(tcgv_pc, pc); // tcg_gen_movi_tl
+
+    gen_helper_access_icache(cpu_env, tcg_const_i32(enclave_mode), tcgv_pc);
+}
+
 /* convert one instruction. s->is_jmp is set if the translation must
    be stopped. Return the next pc value */
 static target_ulong disas_insn(CPUX86State *env, DisasContext *s,
@@ -4455,6 +4465,10 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s,
     s->rip_offset = 0; /* for relative ip address */
     s->vex_l = 0;
     s->vex_v = 0;
+
+    // sgxc
+    wrapper_access_icache(env->cregs.CR_ENCLAVE_MODE, s->pc); 
+
  next_byte:
     //fprintf(stderr, "current PC: %lx [EAX:%lx,EBX:%lx,ECD:%lx,EDX:%lx,ESP:%lx,EBP:%lx,ESI:%lx,EDI:%lx]\n",
     //                 s->pc, env->regs[R_EAX], env->regs[R_EBX], env->regs[R_ECX], env->regs[R_EDX], env->regs[R_ESP], env->regs[R_ESP], env->regs[R_ESI], env->regs[R_EDI]);

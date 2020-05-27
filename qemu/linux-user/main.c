@@ -4408,6 +4408,19 @@ int main(int argc, char **argv, char **envp)
         }
         gdb_handlesig(cpu, 0);
     }
+    
+    // sgxc
+    char name[256];
+	sprintf(name, "%s.out", argv[2]); 
+	printf("Writing to file %s\n", name);
+	env->trace = fopen(name, "w");
+	if(!env->trace) {
+		perror("Failed to open trace file.\n");
+		return 1;
+	}
+	env->start = clock(); // for recording time stamps for memory traces
+	env->previous_timestamp = 0; // for calculating intervals between memory accesses
+
     cpu_loop(env);
     /* never exits */
     return 0;

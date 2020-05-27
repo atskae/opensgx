@@ -234,3 +234,6 @@ DEF_HELPER_3(mem_access, void, env, tl, int)
 
 /* For memory execution protection */
 DEF_HELPER_2(mem_execute, void, env, tl)
+
+// sgxc
+DEF_HELPER_3(access_icache, void, env, int, tl) // params: CPUX86State, is_enclave_mode, PC
